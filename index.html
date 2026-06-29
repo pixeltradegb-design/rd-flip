@@ -1,40 +1,1005 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=/rd-flip/dashboard.html">
-    <title>Redirecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
+    <title>📊 RD Flip</title>
     <style>
-        body { 
-            background: #0d1117; 
-            color: #c9d1d9; 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            min-height: 100dvh;
         }
-        .loader {
-            width: 40px;
-            height: 40px;
+        
+        /* ─── TABS ─── */
+        .tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 2px solid #30363d;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab {
+            flex: 1;
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            color: #8b949e;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .tab:active { transform: scale(0.95); }
+        .tab.active {
+            color: #58a6ff;
+            border-bottom-color: #58a6ff;
+            background: #0d1117;
+        }
+        .tab .badge {
+            background: #1f6feb;
+            color: white;
+            font-size: 11px;
+            padding: 1px 10px;
+            border-radius: 12px;
+            margin-left: 6px;
+        }
+        
+        /* ─── TAB CONTENT ─── */
+        .tab-content {
+            display: none;
+            padding: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .tab-content.active { display: block; }
+        
+        /* ─── HEADER ─── */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #30363d;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #58a6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .header .stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 6px;
+            font-size: 13px;
+            color: #8b949e;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .header .stats span {
+            background: #21262d;
+            padding: 2px 12px;
+            border-radius: 20px;
+        }
+        
+        /* ─── SEARCH & FILTERS ─── */
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            color: #c9d1d9;
+            font-size: 16px;
+            margin-bottom: 12px;
+            -webkit-appearance: none;
+        }
+        .search-box:focus { outline: none; border-color: #58a6ff; }
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .filters button {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            color: #8b949e;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .filters button.active {
+            background: #1f6feb;
+            color: white;
+            border-color: #1f6feb;
+        }
+        .filters button:active { transform: scale(0.95); }
+        .category-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .category-tabs button {
+            padding: 5px 12px;
+            border-radius: 16px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            color: #8b949e;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .category-tabs button.active {
+            background: #1f6feb;
+            color: white;
+            border-color: #1f6feb;
+        }
+        .category-tabs button:active { transform: scale(0.95); }
+        
+        /* ─── ITEM CARDS ─── */
+        .item-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .item-card:active { background: #1c2333; transform: scale(0.99); }
+        .item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f0f6fc;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+        .item-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .item-details .buy { color: #f0883e; font-weight: 600; }
+        .item-details .sell { color: #3fb950; font-weight: 600; }
+        .item-details .roi { color: #58a6ff; font-weight: 600; }
+        .item-details .speed {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .speed.Quick { background: #1a3a2a; color: #3fb950; }
+        .speed.Medium { background: #3d2a1a; color: #f0883e; }
+        .speed.Slow { background: #3a1a1a; color: #f85149; }
+        .item-category {
+            font-size: 11px;
+            color: #58a6ff;
+            background: #0d1f3a;
+            padding: 2px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        
+        /* ─── VERIFIER SPECIFIC ─── */
+        .verify-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .verify-section input {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-size: 16px;
+            -webkit-appearance: none;
+        }
+        .verify-section input:focus { outline: none; border-color: #58a6ff; }
+        .verify-section input::placeholder { color: #484f58; font-size: 14px; }
+        .verify-section button {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .verify-section button:active { transform: scale(0.95); }
+        .btn-verify { background: #1f6feb; color: white; }
+        .btn-verify:hover { background: #58a6ff; }
+        .btn-skip { background: #21262d; color: #8b949e; }
+        .btn-skip:hover { background: #30363d; }
+        .quick-links {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .quick-links a {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-ebay {
+            background: #1a3a2a;
+            color: #3fb950;
+            border: 1px solid #3fb950;
+        }
+        .btn-ebay:hover { background: #3fb950; color: #0d1117; }
+        .btn-amazon {
+            background: #1a2a3a;
+            color: #58a6ff;
+            border: 1px solid #58a6ff;
+        }
+        .btn-amazon:hover { background: #58a6ff; color: #0d1117; }
+        .btn-cex {
+            background: #3a1a2a;
+            color: #f0883e;
+            border: 1px solid #f0883e;
+        }
+        .btn-cex:hover { background: #f0883e; color: #0d1117; }
+        
+        /* ─── PROGRESS ─── */
+        .progress {
+            background: #161b22;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #30363d;
+        }
+        .progress-bar {
+            background: #30363d;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #1f6feb, #58a6ff);
+            height: 100%;
+            transition: width 0.3s;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            line-height: 20px;
+            font-weight: 600;
+        }
+        .counter {
+            font-size: 14px;
+            color: #8b949e;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .counter .badge {
+            background: #21262d;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        /* ─── EMPTY / LOADING ─── */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8b949e;
+        }
+        .empty-state .big { font-size: 48px; margin-bottom: 12px; }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
             border: 3px solid #30363d;
             border-top-color: #58a6ff;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        p { margin-top: 20px; color: #8b949e; }
+        
+        /* ─── EXPORT ─── */
+        .export-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+            text-align: center;
+        }
+        .export-section button {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            background: #1f6feb;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 4px;
+        }
+        .export-section button:hover { background: #58a6ff; }
+        .btn-reset {
+            background: #3d1a1a !important;
+            color: #f85149 !important;
+        }
+        .btn-reset:hover { background: #f85149 !important; color: #0d1117 !important; }
+        
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #21262d;
+            color: #c9d1d9;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.show { opacity: 1; }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #484f58;
+            font-size: 12px;
+        }
+        
+        /* ─── SCROLL TO TOP ─── */
+        .scroll-top {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #1f6feb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 16px rgba(31,111,235,0.3);
+            z-index: 50;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .scroll-top.show { opacity: 1; }
+        .scroll-top:active { transform: scale(0.9); }
+        
+        /* ─── INSTALL BANNER ─── */
+        .install-banner {
+            background: linear-gradient(135deg, #1f6feb, #58a6ff);
+            padding: 10px 16px;
+            border-radius: 12px;
+            margin: 0 12px 12px 12px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .install-banner.show { display: flex; }
+        .install-banner button {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .offline-badge {
+            display: none;
+            background: #3d1a1a;
+            color: #f85149;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            border: 1px solid #f85149;
+        }
+        .offline-badge.show { display: inline-block; }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
-    <p>📊 Loading ResellersDream...</p>
-    <script>
-        // Redirect to dashboard
-        window.location.href = '/rd-flip/dashboard.html';
-    </script>
+
+<!-- ─── INSTALL BANNER ─── -->
+<div class="install-banner" id="installBanner">
+    <span>📲 Install this app</span>
+    <button id="installBtn">Install</button>
+</div>
+
+<!-- ─── TABS ─── -->
+<div class="tabs">
+    <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
+        📊 Dashboard
+    </div>
+    <div class="tab" data-tab="verifier" onclick="switchTab('verifier')">
+        🔍 Verifier
+        <span class="badge" id="verifyBadge">0</span>
+    </div>
+</div>
+
+<!-- ─── DASHBOARD TAB ─── -->
+<div class="tab-content active" id="tab-dashboard">
+    <div class="header">
+        <h1>📊 RD Flip <span class="offline-badge" id="offlineBadge">📡 Offline</span></h1>
+        <div class="stats">
+            <span id="totalItems">📦 Loading...</span>
+            <span id="totalCategories">📂 Categories: ...</span>
+        </div>
+    </div>
+
+    <input class="search-box" id="searchInput" type="text" placeholder="🔍 Search items..." inputmode="search">
+
+    <div class="category-tabs" id="categoryTabs">
+        <button class="active" data-category="all">📋 All</button>
+    </div>
+
+    <div class="filters" id="filterButtons">
+        <button class="active" data-filter="all">All</button>
+        <button data-filter="Quick">⚡ Quick</button>
+        <button data-filter="Medium">🔄 Medium</button>
+        <button data-filter="Slow">🐢 Slow</button>
+    </div>
+
+    <div id="itemsContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top:12px;">Loading database...</p>
+        </div>
+    </div>
+
+    <button class="scroll-top" id="scrollTopBtn">↑</button>
+</div>
+
+<!-- ─── VERIFIER TAB ─── -->
+<div class="tab-content" id="tab-verifier">
+    <div class="header">
+        <h1>🔍 Price Verifier</h1>
+        <div class="stats">
+            <span id="vTotalItems">📦 Loading...</span>
+            <span id="vCategoryCount">📂 Categories: ...</span>
+        </div>
+    </div>
+
+    <div class="progress">
+        <div class="counter">
+            <span id="vCounter">0 / 0 verified</span>
+            <span class="badge" id="vSpeedBadge">⚡ Quick: 0</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="vProgressFill" style="width:0%">0%</div>
+        </div>
+    </div>
+
+    <div id="vItemContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top:12px;">Loading items...</p>
+        </div>
+    </div>
+
+    <div class="export-section" id="vExportSection" style="display:none;">
+        <button onclick="vExportData()">📥 Download CSV</button>
+        <button onclick="vExportVerifiedOnly()">⭐ Verified Only</button>
+        <button class="btn-reset" onclick="vResetAll()">🔄 Reset All</button>
+        <p style="margin-top:8px;font-size:12px;color:#484f58;">
+            💾 Progress saved automatically in your browser
+        </p>
+    </div>
+</div>
+
+<div class="footer">💡 Tap any item for details • 📱 Install for offline access</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// PWA INSTALL
+// ============================================================
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('show');
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        if (result.outcome === 'accepted') {
+            document.getElementById('installBanner').classList.remove('show');
+        }
+        deferredPrompt = null;
+    }
+});
+
+// ─── OFFLINE DETECTION ───
+function updateOnlineStatus() {
+    const badge = document.getElementById('offlineBadge');
+    if (!navigator.onLine) {
+        badge.classList.add('show');
+    } else {
+        badge.classList.remove('show');
+    }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ─── REGISTER SERVICE WORKER ───
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/rd-flip/sw.js')
+        .then(() => console.log('✅ Service Worker registered'))
+        .catch(() => console.log('⚠️ Service Worker registration failed'));
+}
+
+// ============================================================
+// DATA
+// ============================================================
+let allItems = [];
+let verifiedItems = [];
+
+// ─── DASHBOARD STATE ───
+let dashCategory = 'all';
+let dashFilter = 'all';
+let dashSearch = '';
+let dashItems = [];
+
+// ============================================================
+// LOAD DATA
+// ============================================================
+async function loadData() {
+    try {
+        const response = await fetch('/rd-flip/all_items.json');
+        allItems = await response.json();
+        
+        // Load verified data from localStorage
+        const saved = localStorage.getItem('verifiedItems');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            verifiedItems = allItems.map(item => {
+                const savedItem = parsed.find(p => p.item === item.item);
+                if (savedItem && savedItem.verified) {
+                    return { ...item, verified: true, ebay_price: savedItem.ebay_price || null, note: savedItem.note || '' };
+                }
+                return { ...item, verified: false, ebay_price: null, note: '' };
+            });
+        } else {
+            verifiedItems = allItems.map(item => ({ ...item, verified: false, ebay_price: null, note: '' }));
+        }
+        
+        localStorage.setItem('verifiedItems', JSON.stringify(verifiedItems));
+        
+        // Update verifier badge
+        const verifiedCount = verifiedItems.filter(i => i.verified).length;
+        document.getElementById('verifyBadge').textContent = verifiedCount;
+        
+        // Render both views
+        renderDashboard();
+        renderVerifier();
+        
+    } catch (e) {
+        console.error('Error loading data:', e);
+        document.getElementById('itemsContainer').innerHTML = `
+            <div class="empty-state">
+                <div class="big">⚠️</div>
+                <p>Could not load items.</p>
+                <p style="font-size:13px;color:#484f58;">Make sure all_items.json exists.</p>
+            </div>
+        `;
+        document.getElementById('vItemContainer').innerHTML = `
+            <div class="empty-state">
+                <div class="big">⚠️</div>
+                <p>Could not load items.</p>
+                <p style="font-size:13px;color:#484f58;">Make sure all_items.json exists.</p>
+            </div>
+        `;
+    }
+}
+
+// ============================================================
+// SWITCH TABS
+// ============================================================
+function switchTab(tab) {
+    // Update tabs
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+    
+    // Update content
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    
+    // Refresh views
+    if (tab === 'dashboard') renderDashboard();
+    if (tab === 'verifier') renderVerifier();
+}
+
+// ============================================================
+// DASHBOARD RENDER
+// ============================================================
+function renderDashboard() {
+    const search = dashSearch.toLowerCase().trim();
+    const cat = dashCategory;
+    const filter = dashFilter;
+
+    dashItems = allItems.filter(item => {
+        if (cat !== 'all' && item.category !== cat) return false;
+        if (filter !== 'all' && item.speed !== filter) return false;
+        if (search) {
+            return item.item.toLowerCase().includes(search) ||
+                   item.category.toLowerCase().includes(search);
+        }
+        return true;
+    });
+
+    document.getElementById('totalItems').textContent = `📦 ${dashItems.length} items`;
+    
+    const categories = new Set(allItems.map(i => i.category));
+    document.getElementById('totalCategories').textContent = `📂 ${categories.size} categories`;
+
+    if (dashItems.length === 0) {
+        document.getElementById('itemsContainer').innerHTML = `
+            <div class="empty-state">
+                <div class="big">🔍</div>
+                <p>No items found</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    dashItems.forEach(item => {
+        const speedClass = item.speed || 'Slow';
+        const emoji = speedClass === 'Quick' ? '⚡' : speedClass === 'Medium' ? '🔄' : '🐢';
+        const verified = verifiedItems.find(v => v.item === item.item);
+        const verifiedBadge = verified && verified.verified && verified.ebay_price ? 
+            ` ✅ £${verified.ebay_price.toFixed(2)}` : '';
+        html += `
+            <div class="item-card" onclick="showToast('${item.item.replace(/'/g, "\\'")} | Buy: £${item.buy} | Sell: £${item.sell_min}-${item.sell_max} | ROI: ${item.roi}')">
+                <div class="item-title">${item.item}${verifiedBadge}</div>
+                <div class="item-details">
+                    <span class="buy">💰 Buy: £${item.buy.toFixed(2)}</span>
+                    <span class="sell">📈 Sell: £${item.sell_min.toFixed(2)}-${item.sell_max.toFixed(2)}</span>
+                    <span class="roi">📊 ROI: ${item.roi}</span>
+                    <span class="speed ${speedClass}">${emoji} ${speedClass}</span>
+                </div>
+                <span class="item-category">📂 ${item.category}</span>
+            </div>
+        `;
+    });
+
+    document.getElementById('itemsContainer').innerHTML = html;
+    
+    // Scroll to top button
+    if (dashItems.length > 20) {
+        document.getElementById('scrollTopBtn').classList.add('show');
+    } else {
+        document.getElementById('scrollTopBtn').classList.remove('show');
+    }
+}
+
+// ─── DASHBOARD EVENT LISTENERS ───
+document.getElementById('searchInput').addEventListener('input', function() {
+    dashSearch = this.value;
+    renderDashboard();
+});
+
+// ─── CATEGORY TABS ───
+function setupCategoryTabs() {
+    const container = document.getElementById('categoryTabs');
+    const categories = new Set(allItems.map(i => i.category));
+    let html = `<button class="active" data-category="all">📋 All</button>`;
+    categories.forEach(cat => {
+        const emoji = { 'Comics': '💀', 'Manga': '📖', 'Graphic Novel': '📚', 'Blu-ray': '🎬', 'Textbook': '📕', 'Automotive': '🚗', 'Games': '🎮' }[cat] || '📂';
+        html += `<button data-category="${cat}">${emoji} ${cat}</button>`;
+    });
+    container.innerHTML = html;
+    container.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            dashCategory = this.dataset.category;
+            renderDashboard();
+        });
+    });
+}
+
+// ─── FILTER BUTTONS ───
+function setupFilters() {
+    const container = document.getElementById('filterButtons');
+    container.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            dashFilter = this.dataset.filter;
+            renderDashboard();
+        });
+    });
+}
+
+// ─── SCROLL TO TOP ───
+document.getElementById('scrollTopBtn').addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+window.addEventListener('scroll', function() {
+    const btn = document.getElementById('scrollTopBtn');
+    if (window.scrollY > 300) {
+        btn.classList.add('show');
+    } else {
+        btn.classList.remove('show');
+    }
+});
+
+// ============================================================
+// VERIFIER RENDER
+// ============================================================
+function renderVerifier() {
+    const unverified = verifiedItems.filter(item => !item.verified);
+    
+    document.getElementById('vTotalItems').textContent = `📦 ${verifiedItems.length} items`;
+    const categories = new Set(verifiedItems.map(i => i.category));
+    document.getElementById('vCategoryCount').textContent = `📂 ${categories.size} categories`;
+    
+    const quick = verifiedItems.filter(i => i.speed === 'Quick').length;
+    document.getElementById('vSpeedBadge').textContent = `⚡ Quick: ${quick}`;
+    
+    const done = verifiedItems.filter(item => item.verified).length;
+    const total = verifiedItems.length;
+    const pct = total > 0 ? Math.round((done/total)*100) : 0;
+    document.getElementById('vCounter').textContent = `${done} / ${total} verified`;
+    document.getElementById('vProgressFill').style.width = `${pct}%`;
+    document.getElementById('vProgressFill').textContent = `${pct}%`;
+    
+    // Update badge
+    document.getElementById('verifyBadge').textContent = done;
+    
+    if (unverified.length === 0) {
+        document.getElementById('vItemContainer').innerHTML = `
+            <div class="empty-state">
+                <div class="big">🎉</div>
+                <h2>All Done!</h2>
+                <p>You've verified all ${verifiedItems.length} items!</p>
+                <p style="font-size:13px;color:#484f58;margin-top:4px;">Click "Download CSV" to export.</p>
+            </div>
+        `;
+        document.getElementById('vExportSection').style.display = 'block';
+        return;
+    }
+    
+    document.getElementById('vExportSection').style.display = 'block';
+    
+    const item = unverified[0];
+    const speedClass = item.speed || 'Slow';
+    const emoji = speedClass === 'Quick' ? '⚡' : speedClass === 'Medium' ? '🔄' : '🐢';
+    
+    document.getElementById('vItemContainer').innerHTML = `
+        <div class="item-card">
+            <div class="item-title">${item.item}</div>
+            <div class="item-details">
+                <span class="buy">💰 Buy (AI): £${item.buy.toFixed(2)}</span>
+                <span class="sell">📈 AI Sell: £${item.sell_min.toFixed(2)}-${item.sell_max.toFixed(2)}</span>
+                <span class="speed ${speedClass}">${emoji} ${speedClass}</span>
+                <span style="color:#484f58;font-size:12px;">📂 ${item.category}</span>
+            </div>
+            <div class="verify-section">
+                <input type="number" id="vPriceInput" placeholder="Enter eBay sold price" step="0.01" min="0"
+                       onkeydown="if(event.key==='Enter') vVerify()">
+                <button class="btn-verify" onclick="vVerify()">✅ Verify</button>
+                <button class="btn-skip" onclick="vSkip()">⏭️ Skip</button>
+            </div>
+            <div class="quick-links">
+                <a href="#" class="btn-ebay" onclick="vOpenSearch('ebay','${encodeURIComponent(item.item)}')">🔍 eBay</a>
+                <a href="#" class="btn-amazon" onclick="vOpenSearch('amazon','${encodeURIComponent(item.item)}')">🛒 Amazon</a>
+                <a href="#" class="btn-cex" onclick="vOpenSearch('cex','${encodeURIComponent(item.item)}')">🔄 CeX</a>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:#484f58;">
+                ${done + 1} of ${total} | ${pct}% done
+                ${item.verified && item.ebay_price ? `✅ Verified: £${item.ebay_price.toFixed(2)}` : ''}
+            </div>
+        </div>
+    `;
+    
+    const input = document.getElementById('vPriceInput');
+    if (input) { input.focus(); input.select(); }
+}
+
+// ─── VERIFIER ACTIONS ───
+function vVerify() {
+    const input = document.getElementById('vPriceInput');
+    const price = parseFloat(input.value);
+    
+    if (isNaN(price) || price <= 0) {
+        showToast('⚠️ Please enter a valid price');
+        input.focus();
+        input.select();
+        return;
+    }
+    
+    const unverified = verifiedItems.filter(item => !item.verified);
+    if (unverified.length === 0) return;
+    
+    const item = unverified[0];
+    const index = verifiedItems.indexOf(item);
+    
+    verifiedItems[index].verified = true;
+    verifiedItems[index].ebay_price = price;
+    
+    localStorage.setItem('verifiedItems', JSON.stringify(verifiedItems));
+    renderVerifier();
+    showToast(`✅ Verified: £${price.toFixed(2)}`);
+}
+
+function vSkip() {
+    const unverified = verifiedItems.filter(item => !item.verified);
+    if (unverified.length === 0) return;
+    
+    const item = unverified[0];
+    const index = verifiedItems.indexOf(item);
+    
+    verifiedItems[index].verified = true;
+    verifiedItems[index].ebay_price = null;
+    verifiedItems[index].note = 'skipped';
+    
+    localStorage.setItem('verifiedItems', JSON.stringify(verifiedItems));
+    renderVerifier();
+    showToast(`⏭️ Skipped`);
+}
+
+function vOpenSearch(site, query) {
+    const decoded = decodeURIComponent(query);
+    let url = '';
+    switch(site) {
+        case 'ebay':
+            url = `https://www.ebay.co.uk/sch/i.html?_nkw=${query}&_sop=12&LH_Sold=1&LH_Complete=1`;
+            break;
+        case 'amazon':
+            url = `https://www.amazon.co.uk/s?k=${query}`;
+            break;
+        case 'cex':
+            url = `https://uk.webuy.com/search?stext=${query}`;
+            break;
+    }
+    window.open(url, '_blank');
+    return false;
+}
+
+// ─── VERIFIER EXPORT ───
+function vExportData() {
+    let csv = 'Item,Category,Buy (AI),Sell (AI Min),Sell (AI Max),eBay Sold,ROI%,Speed,Status\n';
+    verifiedItems.forEach(item => {
+        const roi = item.ebay_price ? ((item.ebay_price - item.buy) / item.buy * 100).toFixed(0) : 'N/A';
+        const status = item.verified ? (item.ebay_price ? 'Verified' : 'Skipped') : 'Pending';
+        csv += `"${item.item}",${item.category},${item.buy},${item.sell_min},${item.sell_max},${item.ebay_price || ''},${roi},${item.speed},${status}\n`;
+    });
+    downloadCSV(csv, 'all_verified_prices.csv');
+    showToast(`📥 Downloaded all ${verifiedItems.length} items`);
+}
+
+function vExportVerifiedOnly() {
+    const verified = verifiedItems.filter(item => item.verified && item.ebay_price !== null);
+    let csv = 'Item,Category,Buy (AI),eBay Sold,ROI%,Speed,Profit\n';
+    verified.forEach(item => {
+        const roi = ((item.ebay_price - item.buy) / item.buy * 100).toFixed(0);
+        const profit = (item.ebay_price - item.buy).toFixed(2);
+        csv += `"${item.item}",${item.category},${item.buy},${item.ebay_price},${roi}%,${item.speed},£${profit}\n`;
+    });
+    downloadCSV(csv, 'verified_only.csv');
+    showToast(`📥 Downloaded ${verified.length} verified items`);
+}
+
+function vResetAll() {
+    if (confirm('⚠️ Reset all verification data? This cannot be undone!')) {
+        localStorage.removeItem('verifiedItems');
+        location.reload();
+    }
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimeout;
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 2000);
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        vVerify();
+    }
+    if (e.ctrlKey && e.shiftKey && e.key === 'Enter') {
+        e.preventDefault();
+        vSkip();
+    }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+loadData().then(() => {
+    setupCategoryTabs();
+    setupFilters();
+});
+
+console.log('📊 RD Flip - Dashboard + Verifier loaded');
+</script>
 </body>
 </html>
