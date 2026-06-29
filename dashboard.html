@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <title>📊 RD Flip</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 12px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding-bottom: 80px;
+        }
+        .install-banner {
+            background: linear-gradient(135deg, #1f6feb, #58a6ff);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .install-banner.show { display: flex; }
+        .install-banner button {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #30363d;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #58a6ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header .stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #8b949e;
+            flex-wrap: wrap;
+        }
+        .header .stats span {
+            background: #21262d;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            color: #c9d1d9;
+            font-size: 16px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .filters button {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            color: #8b949e;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .filters button.active {
+            background: #1f6feb;
+            color: white;
+            border-color: #1f6feb;
+        }
+        .filters button:active { transform: scale(0.95); }
+        .category-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .category-tabs button {
+            padding: 5px 12px;
+            border-radius: 16px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            color: #8b949e;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .category-tabs button.active {
+            background: #1f6feb;
+            color: white;
+            border-color: #1f6feb;
+        }
+        .category-tabs button:active { transform: scale(0.95); }
+        .item-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .item-card:active {
+            background: #1c2333;
+            transform: scale(0.99);
+        }
+        .item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f0f6fc;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+        .item-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .item-details .buy { color: #f0883e; font-weight: 600; }
+        .item-details .sell { color: #3fb950; font-weight: 600; }
+        .item-details .roi { color: #58a6ff; font-weight: 600; }
+        .item-details .speed {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .speed.Quick { background: #1a3a2a; color: #3fb950; }
+        .speed.Medium { background: #3d2a1a; color: #f0883e; }
+        .speed.Slow { background: #3a1a1a; color: #f85149; }
+        .item-category {
+            font-size: 11px;
+            color: #58a6ff;
+            background: #0d1f3a;
+            padding: 2px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8b949e;
+        }
+        .empty-state .big { font-size: 48px; margin-bottom: 12px; }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #484f58;
+            font-size: 12px;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #21262d;
+            color: #c9d1d9;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 100;
+        }
+        .toast.show { opacity: 1; }
+        .offline-badge {
+            display: none;
+            background: #3d1a1a;
+            color: #f85149;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #f85149;
+        }
+        .offline-badge.show { display: inline-block; }
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f6feb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 16px rgba(31,111,235,0.3);
+            z-index: 50;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .scroll-top.show { opacity: 1; }
+        .scroll-top:active { transform: scale(0.9); }
+    </style>
+</head>
+<body>
+
+    <div class="install-banner" id="installBanner">
+        <span>📲 Install this app</span>
+        <button id="installBtn">Install</button>
+    </div>
+
+    <div class="header">
+        <h1>📊 RD Flip <span class="offline-badge" id="offlineBadge">📡 Offline</span></h1>
+        <div class="stats">
+            <span id="totalItems">📦 Loading...</span>
+            <span id="totalCategories">📂 Categories: ...</span>
+            <span id="lastUpdated">🔄 Updated: ...</span>
+        </div>
+    </div>
+
+    <input class="search-box" id="searchInput" type="text" placeholder="🔍 Search items... (e.g. 'hulk', 'berserk')" inputmode="search" autocomplete="off">
+
+    <div class="category-tabs" id="categoryTabs">
+        <button class="active" data-category="all">📋 All</button>
+    </div>
+
+    <div class="filters" id="filterButtons">
+        <button class="active" data-filter="all">All</button>
+        <button data-filter="Quick">⚡ Quick</button>
+        <button data-filter="Medium">🔄 Medium</button>
+        <button data-filter="Slow">🐢 Slow</button>
+    </div>
+
+    <div id="itemsContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top:12px;">Loading database...</p>
+        </div>
+    </div>
+
+    <div class="footer">💡 Tap any item for details • 📱 Install for offline access</div>
+
+    <button class="scroll-top" id="scrollTopBtn" aria-label="Scroll to top">↑</button>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // PWA Install
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').classList.add('show');
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const result = await deferredPrompt.userChoice;
+                if (result.outcome === 'accepted') {
+                    document.getElementById('installBanner').classList.remove('show');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Offline Detection
+        function updateOnlineStatus() {
+            const badge = document.getElementById('offlineBadge');
+            if (!navigator.onLine) {
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
+        // ============================================================
+        // DATA — All items from your tables
+        // ============================================================
+        const ITEMS = [
+            // ── COMICS (table_20260629) ──────────────────────────────
+            { "item": "Incredible Hulk #181 (1st full Wolverine)", "buy": 20, "sell_min": 150, "sell_max": 400, "roi": "650-1900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Amazing Spider-Man #129 (1st Punisher)", "buy": 15, "sell_min": 80, "sell_max": 200, "roi": "430-1200%", "speed": "Slow", "category": "Comics" },
+            { "item": "New Mutants #98 (1st Deadpool)", "buy": 10, "sell_min": 60, "sell_max": 150, "roi": "500-1400%", "speed": "Slow", "category": "Comics" },
+            { "item": "Batman Adventures #12 (1st Harley Quinn)", "buy": 15, "sell_min": 100, "sell_max": 300, "roi": "560-1900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Walking Dead #1 (Image, 2003)", "buy": 15, "sell_min": 60, "sell_max": 150, "roi": "300-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Amazing Spider-Man #300 (1st full Venom)", "buy": 20, "sell_min": 100, "sell_max": 300, "roi": "400-1400%", "speed": "Slow", "category": "Comics" },
+            { "item": "Amazing Spider-Man #361 (1st full Carnage)", "buy": 10, "sell_min": 50, "sell_max": 150, "roi": "400-1400%", "speed": "Slow", "category": "Comics" },
+            { "item": "Uncanny X-Men #266 (1st Gambit)", "buy": 10, "sell_min": 50, "sell_max": 120, "roi": "400-1100%", "speed": "Slow", "category": "Comics" },
+            { "item": "Uncanny X-Men #248 (1st full Jubilee)", "buy": 8, "sell_min": 30, "sell_max": 80, "roi": "275-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "New Mutants #87 (1st Cable)", "buy": 10, "sell_min": 40, "sell_max": 100, "roi": "300-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Iron Man #55 (1st Thanos)", "buy": 25, "sell_min": 100, "sell_max": 300, "roi": "300-1100%", "speed": "Slow", "category": "Comics" },
+            { "item": "Saga #1 (Image, 2012)", "buy": 10, "sell_min": 40, "sell_max": 100, "roi": "300-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Invincible #1 (Image, 2003)", "buy": 10, "sell_min": 40, "sell_max": 120, "roi": "300-1100%", "speed": "Slow", "category": "Comics" },
+            { "item": "Hellboy: Seed of Destruction #1", "buy": 8, "sell_min": 30, "sell_max": 80, "roi": "275-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Spawn #1 (Image, McFarlane)", "buy": 8, "sell_min": 25, "sell_max": 60, "roi": "210-650%", "speed": "Quick", "category": "Comics" },
+            { "item": "Watchmen #1 (DC, 1986, 1st print)", "buy": 15, "sell_min": 50, "sell_max": 120, "roi": "230-700%", "speed": "Slow", "category": "Comics" },
+            { "item": "Sandman #1 (DC/Vertigo, 1989)", "buy": 20, "sell_min": 70, "sell_max": 150, "roi": "250-650%", "speed": "Slow", "category": "Comics" },
+            { "item": "The Dark Knight Returns 1st print", "buy": 10, "sell_min": 40, "sell_max": 100, "roi": "300-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Batman: The Killing Joke 1st print", "buy": 10, "sell_min": 40, "sell_max": 100, "roi": "300-900%", "speed": "Quick", "category": "Comics" },
+            { "item": "Preacher #1 (DC/Vertigo, 1995)", "buy": 8, "sell_min": 30, "sell_max": 80, "roi": "275-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Y: The Last Man #1", "buy": 8, "sell_min": 30, "sell_max": 80, "roi": "275-900%", "speed": "Slow", "category": "Comics" },
+            { "item": "Marvel Comics Bundle", "buy": 15, "sell_min": 30, "sell_max": 60, "roi": "100-300%", "speed": "Quick", "category": "Comics" },
+            { "item": "DC Comics Bundle", "buy": 15, "sell_min": 30, "sell_max": 60, "roi": "100-300%", "speed": "Quick", "category": "Comics" },
+            { "item": "Comic Bundle / Lot", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "100-300%", "speed": "Quick", "category": "Comics" },
+
+            // ── MANGA (table_20260630) ────────────────────────────────
+            { "item": "Berserk Complete Set (Dark Horse)", "buy": 40, "sell_min": 150, "sell_max": 250, "roi": "275-525%", "speed": "Quick", "category": "Manga" },
+            { "item": "Vagabond Complete Set (Viz, 1-37)", "buy": 45, "sell_min": 180, "sell_max": 280, "roi": "300-520%", "speed": "Quick", "category": "Manga" },
+            { "item": "20th Century Boys Complete (Viz OOP)", "buy": 35, "sell_min": 120, "sell_max": 200, "roi": "240-470%", "speed": "Slow", "category": "Manga" },
+            { "item": "Pluto Complete (Viz, Urasawa)", "buy": 30, "sell_min": 90, "sell_max": 150, "roi": "200-400%", "speed": "Slow", "category": "Manga" },
+            { "item": "Vinland Saga Complete (Kodansha)", "buy": 35, "sell_min": 130, "sell_max": 200, "roi": "270-470%", "speed": "Quick", "category": "Manga" },
+            { "item": "Monster Complete Set (Viz)", "buy": 35, "sell_min": 120, "sell_max": 180, "roi": "240-410%", "speed": "Slow", "category": "Manga" },
+            { "item": "Akira (Kodansha or Dark Horse)", "buy": 30, "sell_min": 90, "sell_max": 160, "roi": "200-430%", "speed": "Quick", "category": "Manga" },
+            { "item": "Uzumaki Deluxe (Viz, Junji Ito)", "buy": 15, "sell_min": 40, "sell_max": 80, "roi": "160-430%", "speed": "Quick", "category": "Manga" },
+            { "item": "Death Note Complete Set (Viz)", "buy": 30, "sell_min": 80, "sell_max": 130, "roi": "160-330%", "speed": "Quick", "category": "Manga" },
+            { "item": "Fullmetal Alchemist Complete (Viz)", "buy": 40, "sell_min": 110, "sell_max": 180, "roi": "175-350%", "speed": "Quick", "category": "Manga" },
+            { "item": "Attack on Titan Complete (Kodansha)", "buy": 35, "sell_min": 90, "sell_max": 140, "roi": "150-300%", "speed": "Quick", "category": "Manga" },
+            { "item": "Demon Slayer Complete (Viz, 1-23)", "buy": 25, "sell_min": 70, "sell_max": 110, "roi": "180-340%", "speed": "Quick", "category": "Manga" },
+            { "item": "Jujutsu Kaisen Complete (Viz)", "buy": 30, "sell_min": 80, "sell_max": 130, "roi": "160-330%", "speed": "Quick", "category": "Manga" },
+            { "item": "Tokyo Ghoul Complete (Viz)", "buy": 25, "sell_min": 70, "sell_max": 110, "roi": "180-340%", "speed": "Quick", "category": "Manga" },
+            { "item": "Chainsaw Man Complete (Viz)", "buy": 25, "sell_min": 65, "sell_max": 100, "roi": "160-300%", "speed": "Quick", "category": "Manga" },
+            { "item": "Gantz Complete (Dark Horse)", "buy": 40, "sell_min": 120, "sell_max": 200, "roi": "200-400%", "speed": "Slow", "category": "Manga" },
+            { "item": "Fruits Basket Collector's (Yen Press)", "buy": 30, "sell_min": 80, "sell_max": 140, "roi": "160-360%", "speed": "Slow", "category": "Manga" },
+            { "item": "Sailor Moon Complete (Kodansha)", "buy": 25, "sell_min": 70, "sell_max": 110, "roi": "180-340%", "speed": "Slow", "category": "Manga" },
+            { "item": "Dragon Ball Complete (Viz)", "buy": 30, "sell_min": 80, "sell_max": 140, "roi": "160-360%", "speed": "Slow", "category": "Manga" },
+            { "item": "Slam Dunk Complete (Viz)", "buy": 35, "sell_min": 90, "sell_max": 160, "roi": "150-350%", "speed": "Slow", "category": "Manga" },
+            { "item": "Inuyasha VIZBIG Complete (OOP)", "buy": 30, "sell_min": 80, "sell_max": 140, "roi": "160-360%", "speed": "Slow", "category": "Manga" },
+            { "item": "JoJo's Bizarre Adventure (Parts 1-6)", "buy": 30, "sell_min": 80, "sell_max": 140, "roi": "160-360%", "speed": "Slow", "category": "Manga" },
+            { "item": "Hunter x Hunter (Viz)", "buy": 30, "sell_min": 80, "sell_max": 140, "roi": "160-360%", "speed": "Slow", "category": "Manga" },
+            { "item": "Bleach Complete (Viz)", "buy": 35, "sell_min": 90, "sell_max": 160, "roi": "150-350%", "speed": "Slow", "category": "Manga" },
+            { "item": "Manga Bundle / Lot", "buy": 25, "sell_min": 40, "sell_max": 80, "roi": "60-220%", "speed": "Quick", "category": "Manga" },
+
+            // ── GRAPHIC NOVELS / TPB ──────────────────────────────────
+            { "item": "Saga Vol 1 (or any volume)", "buy": 15, "sell_min": 40, "sell_max": 80, "roi": "160-430%", "speed": "Quick", "category": "Graphic Novel" },
+            { "item": "Sandman Vol 1 (or any volume)", "buy": 20, "sell_min": 50, "sell_max": 100, "roi": "150-400%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Watchmen Graphic Novel", "buy": 15, "sell_min": 40, "sell_max": 80, "roi": "160-430%", "speed": "Quick", "category": "Graphic Novel" },
+            { "item": "Y: The Last Man", "buy": 12, "sell_min": 35, "sell_max": 70, "roi": "190-480%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Preacher Vol 1 (or any volume)", "buy": 12, "sell_min": 35, "sell_max": 70, "roi": "190-480%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Fables Vol 1 (or any volume)", "buy": 12, "sell_min": 35, "sell_max": 70, "roi": "190-480%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "100 Bullets", "buy": 12, "sell_min": 35, "sell_max": 70, "roi": "190-480%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "The Walking Dead Compendium", "buy": 15, "sell_min": 35, "sell_max": 70, "roi": "130-360%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Maus Graphic Novel", "buy": 15, "sell_min": 40, "sell_max": 80, "roi": "160-430%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Persepolis", "buy": 12, "sell_min": 30, "sell_max": 60, "roi": "150-400%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "V for Vendetta", "buy": 12, "sell_min": 35, "sell_max": 70, "roi": "190-480%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "From Hell (Alan Moore)", "buy": 15, "sell_min": 35, "sell_max": 70, "roi": "130-360%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Hellboy Vol 1 (or any volume)", "buy": 12, "sell_min": 35, "sell_max": 70, "roi": "190-480%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Sin City", "buy": 12, "sell_min": 35, "sell_max": 70, "roi": "190-480%", "speed": "Slow", "category": "Graphic Novel" },
+            { "item": "Graphic Novel Bundle", "buy": 20, "sell_min": 35, "sell_max": 70, "roi": "75-250%", "speed": "Quick", "category": "Graphic Novel" },
+            { "item": "TPB Bundle / Trade Paperback Lot", "buy": 15, "sell_min": 30, "sell_max": 60, "roi": "100-300%", "speed": "Quick", "category": "Graphic Novel" },
+
+            // ── BLU-RAY / STEELBOOKS (table_20260634) ───────────────
+            { "item": "Avengers: Endgame Zavvi Exclusive", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Avengers: Infinity War Zavvi Exclusive", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Black Panther Zavvi Exclusive", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Spider-Man: No Way Home Zavvi", "buy": 15, "sell_min": 35, "sell_max": 60, "roi": "130-300%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "The Mandalorian Box Set Steelbook", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Rogue One Zavvi Exclusive", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "The Batman (2022) Steelbook", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Joker (2019) Steelbook", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Dark Knight Trilogy Steelbook Set", "buy": 20, "sell_min": 50, "sell_max": 90, "roi": "150-350%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Inception Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Interstellar Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Pulp Fiction Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Kill Bill Vol 1 & 2 Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Harry Potter Complete Collection", "buy": 25, "sell_min": 60, "sell_max": 110, "roi": "140-340%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Lord of the Rings Trilogy Steelbook", "buy": 20, "sell_min": 50, "sell_max": 90, "roi": "150-350%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Jurassic Park Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Top Gun: Maverick Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "John Wick Steelbook", "buy": 10, "sell_min": 20, "sell_max": 40, "roi": "100-300%", "speed": "Quick", "category": "Blu-ray" },
+            { "item": "Blade Runner 2049 Steelbook", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Medium", "category": "Blu-ray" },
+            { "item": "The Matrix Steelbook", "buy": 10, "sell_min": 25, "sell_max": 45, "roi": "150-350%", "speed": "Medium", "category": "Blu-ray" },
+            { "item": "Spirited Away (Ghibli) Steelbook", "buy": 18, "sell_min": 40, "sell_max": 75, "roi": "120-310%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Princess Mononoke (Ghibli) Steelbook", "buy": 18, "sell_min": 40, "sell_max": 75, "roi": "120-310%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Akira Steelbook", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Your Name Steelbook", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Dune (2021) Steelbook", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Medium", "category": "Blu-ray" },
+            { "item": "Fight Club Steelbook", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Se7en Steelbook", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "The Shining 4K Steelbook", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Goodfellas 4K Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Scarface 4K Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Watchmen Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "V for Vendetta Steelbook", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Sin City Steelbook", "buy": 10, "sell_min": 20, "sell_max": 40, "roi": "100-300%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "300 Steelbook", "buy": 10, "sell_min": 20, "sell_max": 40, "roi": "100-300%", "speed": "Slow", "category": "Blu-ray" },
+            { "item": "Blu-Ray Bundle / Collection", "buy": 15, "sell_min": 25, "sell_max": 50, "roi": "66-230%", "speed": "Quick", "category": "Blu-ray" },
+
+            // ── TEXTBOOKS (table_20260633) ────────────────────────────
+            { "item": "Gray's Anatomy for Students (current)", "buy": 12, "sell_min": 50, "sell_max": 90, "roi": "310-650%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Kumar & Clark Clinical Medicine", "buy": 12, "sell_min": 50, "sell_max": 85, "roi": "310-600%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Oxford Handbook of Clinical Medicine", "buy": 10, "sell_min": 35, "sell_max": 60, "roi": "250-500%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Oxford Handbook of Surgery", "buy": 10, "sell_min": 35, "sell_max": 60, "roi": "250-500%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Robbins Basic Pathology", "buy": 10, "sell_min": 35, "sell_max": 60, "roi": "250-500%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Guyton & Hall Physiology", "buy": 10, "sell_min": 35, "sell_max": 60, "roi": "250-500%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Bailey & Love Surgery", "buy": 12, "sell_min": 40, "sell_max": 70, "roi": "230-480%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Campbell Biology", "buy": 10, "sell_min": 30, "sell_max": 55, "roi": "200-450%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Lehninger Biochemistry", "buy": 10, "sell_min": 30, "sell_max": 55, "roi": "200-450%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Stewart Calculus", "buy": 8, "sell_min": 25, "sell_max": 50, "roi": "210-520%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Hibbeler Engineering Mechanics", "buy": 8, "sell_min": 25, "sell_max": 50, "roi": "210-520%", "speed": "Slow", "category": "Textbook" },
+            { "item": "Blackstone's Statutes (current)", "buy": 8, "sell_min": 25, "sell_max": 45, "roi": "210-460%", "speed": "Slow", "category": "Textbook" },
+            { "item": "ACCA Kaplan/BPP Texts (current)", "buy": 8, "sell_min": 30, "sell_max": 60, "roi": "275-650%", "speed": "Slow", "category": "Textbook" },
+            { "item": "AAT Level 2/3/4 Texts", "buy": 6, "sell_min": 20, "sell_max": 40, "roi": "230-560%", "speed": "Slow", "category": "Textbook" },
+            { "item": "CGP Revision Guide (any subject)", "buy": 6, "sell_min": 20, "sell_max": 40, "roi": "230-560%", "speed": "Slow", "category": "Textbook" },
+            { "item": "A-Level Textbook Bundle", "buy": 10, "sell_min": 25, "sell_max": 50, "roi": "150-400%", "speed": "Slow", "category": "Textbook" },
+            { "item": "GCSE Textbook Bundle", "buy": 8, "sell_min": 20, "sell_max": 40, "roi": "150-400%", "speed": "Slow", "category": "Textbook" },
+            { "item": "University Textbook Bundle", "buy": 12, "sell_min": 25, "sell_max": 50, "roi": "108-310%", "speed": "Slow", "category": "Textbook" },
+
+            // ── AUTOMOTIVE HANDBOOKS (table_20260632) ────────────────
+            { "item": "Porsche 911 Owner's Handbook", "buy": 5, "sell_min": 40, "sell_max": 80, "roi": "700-1500%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Porsche Boxster/Cayman Handbook", "buy": 4, "sell_min": 30, "sell_max": 60, "roi": "650-1400%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Land Rover Defender Handbook (pre-2016)", "buy": 4, "sell_min": 35, "sell_max": 70, "roi": "775-1650%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Range Rover Classic Handbook", "buy": 4, "sell_min": 30, "sell_max": 60, "roi": "650-1400%", "speed": "Slow", "category": "Automotive" },
+            { "item": "BMW M3 E46 Handbook", "buy": 3, "sell_min": 30, "sell_max": 55, "roi": "900-1700%", "speed": "Slow", "category": "Automotive" },
+            { "item": "BMW M5 E39 Handbook", "buy": 3, "sell_min": 25, "sell_max": 50, "roi": "730-1500%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Mercedes SL R107 Handbook", "buy": 3, "sell_min": 25, "sell_max": 50, "roi": "730-1500%", "speed": "Slow", "category": "Automotive" },
+            { "item": "VW Golf GTI Mk1/Mk2 Handbook", "buy": 3, "sell_min": 25, "sell_max": 50, "roi": "730-1500%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Mini Cooper (Classic) Handbook", "buy": 3, "sell_min": 25, "sell_max": 50, "roi": "730-1500%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Jaguar E-Type Handbook", "buy": 5, "sell_min": 40, "sell_max": 80, "roi": "700-1500%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Toyota Supra Handbook", "buy": 4, "sell_min": 25, "sell_max": 50, "roi": "525-1150%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Nissan Skyline GT-R Handbook", "buy": 5, "sell_min": 35, "sell_max": 65, "roi": "600-1200%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Mazda RX-7 Handbook", "buy": 4, "sell_min": 25, "sell_max": 50, "roi": "525-1150%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Subaru Impreza WRX Handbook", "buy": 3, "sell_min": 20, "sell_max": 40, "roi": "560-1200%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Mitsubishi Lancer Evo Handbook", "buy": 4, "sell_min": 25, "sell_max": 50, "roi": "525-1150%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Lotus Elise Handbook", "buy": 4, "sell_min": 25, "sell_max": 50, "roi": "525-1150%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Aston Martin DB Handbook", "buy": 5, "sell_min": 40, "sell_max": 80, "roi": "700-1500%", "speed": "Slow", "category": "Automotive" },
+            { "item": "Haynes Manual (any classic car)", "buy": 3, "sell_min": 20, "sell_max": 40, "roi": "560-1200%", "speed": "Slow", "category": "Automotive" },
+
+            // ── GAMES CONSOLES / HANDHELDS (table_20260631) ──────────
+            { "item": "New Nintendo 3DS XL (any colour)", "buy": 35, "sell_min": 100, "sell_max": 150, "roi": "185-330%", "speed": "Quick", "category": "Games" },
+            { "item": "Nintendo 3DS XL (OG model)", "buy": 25, "sell_min": 70, "sell_max": 110, "roi": "180-340%", "speed": "Quick", "category": "Games" },
+            { "item": "New Nintendo 3DS (small)", "buy": 30, "sell_min": 85, "sell_max": 130, "roi": "180-330%", "speed": "Quick", "category": "Games" },
+            { "item": "Nintendo 2DS XL", "buy": 20, "sell_min": 60, "sell_max": 90, "roi": "200-350%", "speed": "Quick", "category": "Games" },
+            { "item": "PS Vita 1000 OLED (with memory card)", "buy": 35, "sell_min": 100, "sell_max": 160, "roi": "185-350%", "speed": "Quick", "category": "Games" },
+            { "item": "PS Vita 2000 LCD (slim)", "buy": 30, "sell_min": 85, "sell_max": 130, "roi": "180-330%", "speed": "Quick", "category": "Games" },
+            { "item": "PSP 3000 (best model)", "buy": 15, "sell_min": 50, "sell_max": 80, "roi": "230-430%", "speed": "Quick", "category": "Games" },
+            { "item": "PSP 2000 (slim)", "buy": 12, "sell_min": 40, "sell_max": 65, "roi": "230-440%", "speed": "Quick", "category": "Games" },
+            { "item": "PSP 1000 (fat)", "buy": 10, "sell_min": 30, "sell_max": 50, "roi": "200-400%", "speed": "Quick", "category": "Games" },
+            { "item": "Nintendo DSi XL", "buy": 20, "sell_min": 50, "sell_max": 80, "roi": "150-300%", "speed": "Quick", "category": "Games" },
+            { "item": "Nintendo DSi", "buy": 15, "sell_min": 35, "sell_max": 60, "roi": "130-300%", "speed": "Quick", "category": "Games" },
+            { "item": "Nintendo DS Lite", "buy": 12, "sell_min": 30, "sell_max": 50, "roi": "150-310%", "speed": "Quick", "category": "Games" },
+            { "item": "3DS Fire Emblem Awakening", "buy": 15, "sell_min": 40, "sell_max": 70, "roi": "160-360%", "speed": "Quick", "category": "Games" },
+            { "item": "3DS Pokémon X/Y", "buy": 10, "sell_min": 25, "sell_max": 50, "roi": "150-400%", "speed": "Quick", "category": "Games" },
+            { "item": "3DS Zelda: Ocarina 3D", "buy": 12, "sell_min": 30, "sell_max": 55, "roi": "150-350%", "speed": "Quick", "category": "Games" },
+            { "item": "PSP Persona 3 Portable", "buy": 20, "sell_min": 50, "sell_max": 90, "roi": "150-350%", "speed": "Quick", "category": "Games" },
+            { "item": "PSP Crisis Core: FFVII", "buy": 5, "sell_min": 20, "sell_max": 40, "roi": "300-700%", "speed": "Quick", "category": "Games" },
+            { "item": "PSP GTA Vice City Stories", "buy": 5, "sell_min": 20, "sell_max": 40, "roi": "300-700%", "speed": "Quick", "category": "Games" },
+            { "item": "Vita Persona 4 Golden", "buy": 20, "sell_min": 45, "sell_max": 80, "roi": "125-300%", "speed": "Quick", "category": "Games" },
+            { "item": "Vita Danganronpa: THH", "buy": 15, "sell_min": 35, "sell_max": 65, "roi": "130-330%", "speed": "Quick", "category": "Games" },
+            { "item": "3DS Console Bundle", "buy": 45, "sell_min": 100, "sell_max": 150, "roi": "122-233%", "speed": "Quick", "category": "Games" },
+            { "item": "PS Vita Bundle (console + games)", "buy": 50, "sell_min": 100, "sell_max": 160, "roi": "100-220%", "speed": "Quick", "category": "Games" },
+            { "item": "PSP Bundle (console + games)", "buy": 20, "sell_min": 50, "sell_max": 80, "roi": "150-300%", "speed": "Quick", "category": "Games" }
+        ];
+
+        // ─── APP LOGIC ──────────────────────────────────────────────
+        let currentCategory = 'all';
+        let currentFilter = 'all';
+        let searchTerm = '';
+        let filteredItems = [];
+
+        const container = document.getElementById('itemsContainer');
+        const searchInput = document.getElementById('searchInput');
+        const totalEl = document.getElementById('totalItems');
+        const categoriesEl = document.getElementById('totalCategories');
+        const updatedEl = document.getElementById('lastUpdated');
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+        function getCategories() {
+            const cats = new Set();
+            ITEMS.forEach(item => cats.add(item.category));
+            return Array.from(cats).sort();
+        }
+
+        function getSpeedEmoji(speed) {
+            if (speed === 'Quick') return '⚡';
+            if (speed === 'Medium') return '🔄';
+            if (speed === 'Slow') return '🐢';
+            return '❓';
+        }
+
+        function formatPrice(p) { return '£' + p.toFixed(2); }
+
+        function render() {
+            const search = searchTerm.toLowerCase().trim();
+            const cat = currentCategory;
+            const filter = currentFilter;
+
+            filteredItems = ITEMS.filter(item => {
+                if (cat !== 'all' && item.category !== cat) return false;
+                if (filter !== 'all' && item.speed !== filter) return false;
+                if (search) {
+                    return item.item.toLowerCase().includes(search) ||
+                           item.category.toLowerCase().includes(search);
+                }
+                return true;
+            });
+
+            totalEl.textContent = `📦 ${filteredItems.length} items`;
+            categoriesEl.textContent = `📂 ${getCategories().length} categories`;
+
+            if (filteredItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="big">🔍</div>
+                        <p>No items found matching your filters</p>
+                        <p style="font-size:13px;margin-top:8px;color:#484f58;">
+                            Try changing the search or filters above
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredItems.forEach(item => {
+                const speedEmoji = getSpeedEmoji(item.speed);
+                const speedClass = item.speed;
+                html += `
+                    <div class="item-card" onclick="showToast('${item.item.replace(/'/g, "\\'")} | Buy: £${item.buy} | Sell: £${item.sell_min}-${item.sell_max} | ROI: ${item.roi}')">
+                        <div class="item-title">${item.item}</div>
+                        <div class="item-details">
+                            <span class="buy">💰 Buy: ${formatPrice(item.buy)}</span>
+                            <span class="sell">📈 Sell: ${formatPrice(item.sell_min)}-${formatPrice(item.sell_max)}</span>
+                            <span class="roi">📊 ROI: ${item.roi}</span>
+                            <span class="speed ${speedClass}">${speedEmoji} ${item.speed}</span>
+                        </div>
+                        <span class="item-category">📂 ${item.category}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            if (filteredItems.length > 20) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        }
+
+        let toastTimeout;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        function setupCategories() {
+            const tabsContainer = document.getElementById('categoryTabs');
+            const categories = getCategories();
+            let html = `<button class="active" data-category="all">📋 All</button>`;
+            categories.forEach(cat => {
+                const emoji = { 'Comics': '💀', 'Manga': '📖', 'Graphic Novel': '📚', 'Blu-ray': '🎬', 'Textbook': '📕', 'Automotive': '🚗', 'Games': '🎮' }[cat] || '📂';
+                html += `<button data-category="${cat}">${emoji} ${cat}</button>`;
+            });
+            tabsContainer.innerHTML = html;
+            tabsContainer.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabsContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    render();
+                });
+            });
+        }
+
+        function setupFilters() {
+            const filters = document.getElementById('filterButtons');
+            filters.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    render();
+                });
+            });
+        }
+
+        searchInput.addEventListener('input', function() {
+            searchTerm = this.value;
+            render();
+        });
+
+        scrollTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('✅ Service Worker registered'))
+                .catch(() => console.log('⚠️ Service Worker registration failed'));
+        }
+
+        // Init
+        updatedEl.textContent = '🔄 ' + new Date().toLocaleDateString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        setupCategories();
+        setupFilters();
+        render();
+        console.log(`📊 RD Flip PWA loaded with ${ITEMS.length} items`);
+    </script>
+</body>
+</html>
