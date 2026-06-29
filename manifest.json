@@ -1,8 +1,8 @@
 {
   "name": "ResellersDream",
   "short_name": "RD Flip",
-  "description": "Price database for ResellersDream - View buy/sell prices, ROI, and speed",
-  "start_url": "/rd-flip/dashboard.html",
+  "description": "Price database and verifier for ResellersDream",
+  "start_url": "/rd-flip/index.html",
   "display": "standalone",
   "background_color": "#0d1117",
   "theme_color": "#0d1117",
